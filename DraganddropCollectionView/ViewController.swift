@@ -2,20 +2,22 @@ import UIKit
 
 class ViewController: UIViewController {
     var collectionView: UICollectionView?
-    var items: [UIColor] = [.black, .blue, .systemRed, .systemPink, .systemTeal, .systemIndigo, .systemPurple, .systemOrange, .white]
+    var items = ["5","6","2","3","7","0","1","8","4"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCollectionView()
+        updateBackgroundColor()
     }
 
     func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
-        layout.itemSize = CGSize(width: view.frame.size.width/3.2, height: view.frame.size.height/3.2)
+        let itemSize = (view.frame.size.width - 20) / 3.2 // Make cells square and fit 3 cells horizontally with some spacing
+        layout.itemSize = CGSize(width: itemSize, height: itemSize)
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
+        collectionView = UICollectionView(frame: CGRect(x: 0, y: (view.frame.size.height - itemSize * 3) / 2, width: view.frame.size.width, height: itemSize * 3), collectionViewLayout: layout)
         collectionView?.dataSource = self
         collectionView?.delegate = self
         collectionView?.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
@@ -45,6 +47,13 @@ class ViewController: UIViewController {
         }
     }
 
+    func updateBackgroundColor() {
+        if items == ["0", "1", "2", "3", "4", "5", "6", "7", "8"] {
+            view.backgroundColor = .red
+        } else {
+            view.backgroundColor = .white
+        }
+    }
 }
 
 extension ViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, UICollectionViewDataSource {
@@ -55,7 +64,12 @@ extension ViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDe
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
-        cell.backgroundColor = items[indexPath.item]
+        if let image = UIImage(named: items[indexPath.item]) {
+            let imageView = UIImageView(image: image)
+            imageView.frame = cell.contentView.bounds
+            imageView.contentMode = .scaleToFill
+            cell.contentView.addSubview(imageView)
+        }
         return cell
     }
 
@@ -64,11 +78,13 @@ extension ViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDe
     }
 
     func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-        let movable = items.remove(at: sourceIndexPath.row)
-        items.insert(movable, at: destinationIndexPath.row)
+        let movable = items.remove(at: sourceIndexPath.item)
+        items.insert(movable, at: destinationIndexPath.item)
+        updateBackgroundColor()
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: view.frame.size.width/3.2, height: view.frame.size.height/3.2)
+        let itemSize = (view.frame.size.width - 20) / 3.2 // Make cells square and fit 3 cells horizontally with some spacing
+        return CGSize(width: itemSize, height: itemSize)
     }
 }
